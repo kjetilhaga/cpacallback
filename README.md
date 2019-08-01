@@ -18,4 +18,4 @@ Callback endpoint url
 
 WSDL url
 
-    http://localhost:8080/api/ws/smscallback/smscallbac
+    http://localhost:8080/api/ws/smscallback/smscallback
