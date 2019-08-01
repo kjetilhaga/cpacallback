@@ -1,0 +1,194 @@
+/**
+ * This file implements a minimal XJC gradle plugin using xjc tool to compile wsdls.
+ * The plugin can be configured as follows:
+ *
+ * <pre>
+ * apply from: xjc.gradle
+ *
+ * xjc {
+ *     wsdls {
+ *         <name of wsdl config> {
+ *             uri = <path to wsdl>
+ *             packageName = <package name to use>
+ *         }
+ *
+ *         <name of another wsdl config> {
+ *             uri = <path to wsdl>
+ *             packageName = <package name to use>
+ *         }
+ *
+ *         ...
+ *     }
+ * }
+ * </pre>
+ *
+ * @version 1.0 First version
+ * @author Kjetil Haga
+ */
+
+apply plugin: XjcPlugin
+
+// Create a xjc configuration for xjc compilation classpath
+configurations {
+    xjcPlugin
+}
+
+// Dependencies from the jaxb configuration
+dependencies {
+    xjcPlugin "org.glassfish.jaxb:jaxb-xjc:2.2.11"
+}
+
+/**
+ * Class that holds plugin configuration parameters
+ */
+class Wsdl
+{
+    /**
+     * We need this constructor so that Gradle can create an instance from the DSL.
+     */
+    Wsdl(String name) {
+        this.name = name
+    }
+
+    /**
+     * Name of wsdl configuration
+     */
+    final String name
+
+    /**
+     * Path to wsdl file
+     */
+    File uri
+
+    /**
+     * Target package name
+     */
+    String packageName
+}
+
+/**
+ * The root configuration parameters object used by plugin
+ */
+class XjcPluginExtension {
+    /**
+     * Named list of wsdl configurations
+     */
+    NamedDomainObjectContainer<Wsdl> wsdls
+
+    /**
+     * Needed to configure the NamedDomainObjectContainer (called by DSL)
+     */
+    def wsdls(final Closure configureClosure) {
+        wsdls.configure(configureClosure)
+    }
+}
+
+/**
+ * The plugin class
+ */
+class XjcPlugin implements  Plugin<Project> {
+    final static String ROOT_EXTENSION_NAME = "xjc"
+
+    void apply(Project project) {
+        setupExtensions(project)
+        setupTasks(project)
+    }
+
+    def static setupExtensions(final Project project) {
+        def extension = new XjcPluginExtension()
+        extension.wsdls = project.container(Wsdl)
+        project.extensions.add(ROOT_EXTENSION_NAME, extension)
+    }
+
+    def static setupTasks(final Project project) {
+        def xjc = (XjcPluginExtension) project.extensions.getByName(ROOT_EXTENSION_NAME)
+
+        xjc.wsdls.all {
+            def wsdlInfo = delegate
+
+            // Create a task for each wsdl configuration
+            final String name = wsdlInfo.name
+            def taskName = String.format("compileWsdl%s", name.capitalize())
+
+            // Create task for wsdl configuration
+            project.afterEvaluate {
+                project.task(taskName, type: CompileWsdl) {
+                    group = "XjcPlugin"
+                    description = "Compiles '${wsdlInfo.uri}' into java source code which will be part of 'generated' source set"
+                    wsdl = (Wsdl) wsdlInfo
+                    classpath = project.configurations.xjcPlugin.asPath
+                    outputDir = new File("${project.buildDir}/tmp/xjc", taskName)
+                }
+
+            }
+        }
+    }
+
+}
+
+/**
+ * The task that does the job by compiling the input wsdl.
+ */
+class CompileWsdl extends DefaultTask {
+    Wsdl wsdl
+    def classpath
+
+    @OutputDirectory
+    File outputDir
+
+    @TaskAction
+    def compile() {
+        project.ant {
+            taskdef name: "xjc", classname: "com.sun.tools.xjc.XJCTask",
+                    classpath: classpath
+            mkdir(dir: outputDir)
+
+            xjc(destdir: outputDir, schema: wsdl.uri, package: wsdl.packageName) {
+                arg(value: "-wsdl")
+                produces(dir: outputDir, includes: "**/*.java")
+            }
+        }
+    }
+}
+
+/**
+ * Collects generated source code and copies it into build/generated-sources/java folder
+ * (Intellij and possibly other tools need source code to be organized correctly related
+ * to package name to make intellisense work).
+ */
+task collectGeneratedSources (type: Copy) {
+    from tasks.withType(CompileWsdl).each {it.outputDir}
+    into "${buildDir}/generated-sources/java"
+}
+
+/**
+ * Defines a custom source set called 'generated' where all generated source code will be put into.
+ */
+sourceSets {
+    generated {
+        java.srcDirs =  ["${buildDir}/generated-sources/java"]
+        compileClasspath = configurations.xjcPlugin
+    }
+}
+
+/**
+ * Set task dependencies so that the generated sources are generated before the compileJava task
+ */
+collectGeneratedSources.dependsOn tasks.withType(CompileWsdl)
+compileJava.dependsOn collectGeneratedSources
+
+/**
+ * Add generated sources as dependency to compileJava
+ */
+dependencies {
+    compile sourceSets.generated.output
+}
+
+/**
+ * The following will tell Intellij to flag the generated source folder as generated source code
+ */
+idea {
+    module {
+        sourceDirs += file("${buildDir}/generated-sources/java")
+    }
+}

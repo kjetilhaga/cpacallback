@@ -1,0 +1,43 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.6.RELEASE'
+	id 'java'
+}
+
+apply plugin: "idea"
+apply plugin: 'io.spring.dependency-management'
+apply from: "xjc.gradle"
+
+group = 'no.telia.cpa.summerinterns'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+/** Generate java source code from wsdl files using XJC compiler plugin */
+xjc {
+	wsdls {
+		smsBulk {
+			uri = file("src/main/resources/ws/smsbulk/smsbulk.wsdl")
+			packageName = "no.telia.cpa.summerinterns.ws.smsbulk"
+		}
+		smsCallback {
+			uri = file("src/main/resources/ws/smscallback/smscallback.wsdl")
+			packageName = "no.telia.cpa.summerinterns.ws.smscallback"
+		}
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// web services
+	implementation "wsdl4j:wsdl4j:1.6.3"
+
+	// utilities
+	implementation "org.apache.commons:commons-lang3:3.9"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

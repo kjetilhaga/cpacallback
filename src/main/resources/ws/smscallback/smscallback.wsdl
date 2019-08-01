@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="SmsCallbackService" targetNamespace="http://differitas.no/2006/09/messaging/sms"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:tns="http://differitas.no/2006/09/messaging/sms" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://differitas.no/2006/09/messaging/sms/Imports">
+			<xsd:import schemaLocation="smscallback.xsd" namespace="http://differitas.no/2006/09/messaging/sms"/>
+			<xsd:import schemaLocation="serialize.xsd" namespace="http://schemas.microsoft.com/2003/10/Serialization/"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="DeliverRequest">
+		<wsdl:part name="parameters" element="tns:DeliverReq"/>
+	</wsdl:message>
+	<wsdl:message name="DeliverResponse">
+		<wsdl:part name="parameters" element="tns:DeliverRsp"/>
+	</wsdl:message>
+	<wsdl:message name="ValidationFault">
+		<wsdl:part name="detail" element="tns:ValidationFault"/>
+	</wsdl:message>
+	<wsdl:message name="ServerFault">
+		<wsdl:part name="detail" element="tns:ServerFault"/>
+	</wsdl:message>
+	<wsdl:message name="DeliveryReportRequest">
+		<wsdl:part name="parameters" element="tns:DeliveryReportReq"/>
+	</wsdl:message>
+	<wsdl:message name="DeliveryReportResponse">
+		<wsdl:part name="parameters" element="tns:DeliveryReportRsp"/>
+	</wsdl:message>
+	<wsdl:portType name="SmsCallbackService">
+		<wsdl:operation name="DeliverMessage">
+			<wsdl:input wsaw:Action="http://differitas.no/2006/09/messaging/sms/SmsCallbackService/DeliverMessage" name="DeliverRequest" message="tns:DeliverRequest"/>
+			<wsdl:output wsaw:Action="http://differitas.no/2006/09/messaging/sms/SmsCallbackService/DeliverMessageResponse" name="DeliverResponse" message="tns:DeliverResponse"/>
+			<wsdl:fault wsaw:Action="http://differitas.no/2006/09/messaging/sms/ValidationFault" name="ValidationFault" message="tns:ValidationFault"/>
+			<wsdl:fault wsaw:Action="http://differitas.no/2006/09/messaging/sms/ServerFault" name="ServerFault" message="tns:ServerFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="DeliverReport">
+			<wsdl:input wsaw:Action="http://differitas.no/2006/09/messaging/sms/SmsCallbackService/DeliverReport" name="DeliveryReportRequest" message="tns:DeliveryReportRequest"/>
+			<wsdl:output wsaw:Action="http://differitas.no/2006/09/messaging/sms/SmsCallbackService/DeliverReportResponse" name="DeliveryReportResponse" message="tns:DeliveryReportResponse"/>
+			<wsdl:fault wsaw:Action="http://differitas.no/2006/09/messaging/sms/ValidationFault" name="ValidationFault" message="tns:ValidationFault"/>
+			<wsdl:fault wsaw:Action="http://differitas.no/2006/09/messaging/sms/ServerFault" name="ServerFault" message="tns:ServerFault"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="SmsCallbackPort" type="tns:SmsCallbackService">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="DeliverMessage">
+			<soap:operation soapAction="http://differitas.no/2006/09/messaging/sms/SmsCallbackService/DeliverMessage" style="document"/>
+			<wsdl:input name="DeliverRequest">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="DeliverResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="ValidationFault">
+				<soap:fault name="ValidationFault" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="ServerFault">
+				<soap:fault name="ServerFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="DeliverReport">
+			<soap:operation soapAction="http://differitas.no/2006/09/messaging/sms/SmsCallbackService/DeliverReport" style="document"/>
+			<wsdl:input name="DeliveryReportRequest">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="DeliveryReportResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="ValidationFault">
+				<soap:fault name="ValidationFault" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="ServerFault">
+				<soap:fault name="ServerFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="SmsCallbackService">
+		<wsdl:port name="SmsCallbackPort" binding="tns:SmsCallbackPort">
+			<soap:address location="http://localhost:8080/wssmsservice/smscallback"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

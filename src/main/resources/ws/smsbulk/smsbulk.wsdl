@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="SmsService" targetNamespace="http://differitas.no/2006/09/messaging/sms"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  xmlns:tns="http://differitas.no/2006/09/messaging/sms"
+                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+>
+	<wsp:Policy wsu:Id="SmsPort_policy">
+		<wsp:ExactlyOne>
+			<wsp:All>
+				<http:BasicAuthentication xmlns:http="http://schemas.microsoft.com/ws/06/2004/policy/http"/>
+			</wsp:All>
+		</wsp:ExactlyOne>
+	</wsp:Policy>
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://differitas.no/2006/09/messaging/sms/Imports">
+			<xsd:import schemaLocation="smsbulk-1.xsd" namespace="http://differitas.no/2006/09/messaging/sms"/>
+			<xsd:import schemaLocation="serialize.xsd" namespace="http://schemas.microsoft.com/2003/10/Serialization/"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="SubmitRequest">
+		<wsdl:part name="parameters" element="tns:SubmitReq"/>
+	</wsdl:message>
+	<wsdl:message name="SubmitResponse">
+		<wsdl:part name="parameters" element="tns:SubmitRsp"/>
+	</wsdl:message>
+	<wsdl:message name="SmsService_Submit_ServerFault_FaultMessage">
+		<wsdl:part name="detail" element="tns:ServerFault"/>
+	</wsdl:message>
+	<wsdl:message name="SmsService_Submit_ValidationFault_FaultMessage">
+		<wsdl:part name="detail" element="tns:ValidationFault"/>
+	</wsdl:message>
+	<wsdl:portType name="SmsService">
+		<wsdl:operation name="Submit">
+			<wsdl:input wsaw:Action="http://differitas.no/2006/09/messaging/sms/SmsService/Submit" name="SubmitRequest" message="tns:SubmitRequest"/>
+			<wsdl:output wsaw:Action="http://differitas.no/2006/09/messaging/sms/SmsService/SubmitResponse" name="SubmitResponse" message="tns:SubmitResponse"/>
+			<wsdl:fault wsaw:Action="http://differitas.no/2006/09/messaging/sms/ServerFault" name="ServerFault" message="tns:SmsService_Submit_ServerFault_FaultMessage"/>
+			<wsdl:fault wsaw:Action="http://differitas.no/2006/09/messaging/sms/ValidationFault" name="ValidationFault" message="tns:SmsService_Submit_ValidationFault_FaultMessage"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="SmsPort" type="tns:SmsService">
+		<wsp:PolicyReference URI="#SmsPort_policy"/>
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="Submit">
+			<soap:operation soapAction="http://differitas.no/2006/09/messaging/sms/SmsService/Submit" style="document"/>
+			<wsdl:input name="SubmitRequest">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="SubmitResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="ServerFault">
+				<soap:fault name="ServerFault" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="ValidationFault">
+				<soap:fault name="ValidationFault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="SmsService">
+		<wsdl:port name="SmsPort" binding="tns:SmsPort">
+			<soap:address location="https://api.messaging.telia.no/smsbulk/ws/v2"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

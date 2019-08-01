@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://differitas.no/2006/09/messaging/sms" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://differitas.no/2006/09/messaging/sms">
+	<xs:element name="DeliverReq">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="1" name="DeliverMessage" type="tns:DeliverMessage"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="DeliverMessage">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="1" name="Account" type="tns:Address"/>
+			<xs:element minOccurs="0" maxOccurs="1" name="OA" type="tns:Address"/>
+			<xs:element minOccurs="0" maxOccurs="1" name="DA" type="tns:Address"/>
+			<xs:element minOccurs="0" maxOccurs="1" name="Content" type="tns:Content"/>
+            <xs:element minOccurs="0" maxOccurs="1" name="DeliveryTime" type="xs:string" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="Address">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="format" type="tns:AddressFormat"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="AddressFormat">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="number"/>
+			<xs:enumeration value="shortcode"/>
+			<xs:enumeration value="alphanum"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element minOccurs="0" maxOccurs="1" name="Text" type="tns:Text"/>
+				<xs:element minOccurs="0" maxOccurs="1" name="Binary" type="tns:Binary"/>
+			</xs:choice>
+			<xs:element minOccurs="0" maxOccurs="1" name="DCS" type="xs:int"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Text">
+		<xs:simpleContent>
+			<xs:extension base="tns:UserData"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="UserData">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="header" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="Binary">
+		<xs:simpleContent>
+			<xs:extension base="tns:UserData"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="DeliverRsp">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="1" name="ReportMessage" type="tns:ReportMessage"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="ReportMessage">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="1" name="Status" type="tns:Status"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="cref" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="Status">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="code" type="xs:int" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="ValidationFault">
+		<xs:sequence>
+			<xs:element minOccurs="0" name="Message" nillable="true" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ValidationFault" nillable="true" type="tns:ValidationFault"/>
+	<xs:complexType name="ServerFault">
+		<xs:sequence>
+			<xs:element minOccurs="0" name="Message" nillable="true" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ServerFault" nillable="true" type="tns:ServerFault"/>
+	<xs:element name="DeliveryReportReq">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="1" name="DeliveryReportMessage" type="tns:DeliveryReportMessage"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="DeliveryReportMessage">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="1" name="Status" type="tns:Status"/>
+			<xs:element minOccurs="0" maxOccurs="1" name="Account" type="tns:Address" />
+			<xs:element minOccurs="0" maxOccurs="1" name="OA" type="tns:Address"/>
+			<xs:element minOccurs="0" maxOccurs="1" name="DA" type="tns:Address"/>
+            <xs:element minOccurs="0" maxOccurs="1" name="DeliveryTime" type="xs:string" />            
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="cref" type="xs:string"/>
+		<xs:attribute name="type" type="tns:DeliveryReportType" use="required"/>
+	</xs:complexType>
+	<xs:simpleType name="DeliveryReportType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="retrieved"/>
+			<xs:enumeration value="rejected"/>
+			<xs:enumeration value="expired"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="DeliveryReportRsp">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="1" name="ReportMessage" type="tns:ReportMessage"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

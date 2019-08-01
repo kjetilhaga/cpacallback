@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://differitas.no/2006/09/messaging/sms" targetNamespace="http://differitas.no/2006/09/messaging/sms" elementFormDefault="qualified">
+	<xs:element name="SubmitReq">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SubmitMessage" type="tns:SubmitMessage" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="SubmitMessage">
+		<xs:sequence>
+			<xs:element name="Account" type="tns:Address" minOccurs="0"/>
+			<xs:element name="DA" type="tns:Address" minOccurs="0"/>
+			<xs:element name="Destinations" type="tns:Destinations" minOccurs="0" />
+			<xs:element name="OA" type="tns:Address" minOccurs="0"/>
+			<xs:element name="Content" type="tns:Content" minOccurs="0"/>
+			<xs:element name="Cost" type="tns:Cost" minOccurs="0"/>
+			<xs:element name="InvoiceText" type="xs:string" minOccurs="0"/>
+			<xs:element name="ExpiryDate" type="tns:RelativeOrAbsoluteDateTime" minOccurs="0"/>
+			<xs:element name="DeliveryDate" type="tns:RelativeOrAbsoluteDateTime" minOccurs="0"/>
+			<xs:element name="Rating" type="tns:Rating" minOccurs="0"/>
+            <xs:element name="Service" type="tns:Service" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="cref" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="Destinations">
+		<xs:sequence>
+			<xs:element name="DA" type="tns:Address" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Address">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="format" type="tns:AddressFormat"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="AddressFormat">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="number"/>
+			<xs:enumeration value="shortcode"/>
+			<xs:enumeration value="alphanum"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Content">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Text" type="tns:Text" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="Binary" type="tns:Binary" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
+			<xs:element name="DCS" type="xs:int" minOccurs="0"/>
+            <xs:element name="PID" type="xs:int" minOccurs="0" /> 
+		</xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="Service">
+        <xs:sequence />
+        <xs:attribute name="type" type="xs:string" />
+        <xs:attribute name="category" type="xs:string" />
+    </xs:complexType>
+	<xs:complexType name="Text">
+		<xs:simpleContent>
+			<xs:extension base="tns:UserData"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="UserData">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="header" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="Binary">
+		<xs:simpleContent>
+			<xs:extension base="tns:UserData"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="Cost">
+		<xs:simpleContent>
+			<xs:extension base="xs:int">
+				<xs:attribute name="currency" default="NOK">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="NOK"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+                <xs:attribute name="vat" type="xs:string" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="RelativeOrAbsoluteDateTime">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="format" type="tns:DateTimeFormat" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="DateTimeFormat">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="relative"/>
+			<xs:enumeration value="absolute"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Rating">
+		<xs:attribute name="AgeLimit" type="xs:int" use="required"/>
+	</xs:complexType>
+	<xs:element name="SubmitRsp">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ReportMessage" type="tns:ReportMessage" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="ReportMessage">
+		<xs:sequence>
+			<xs:element name="Status" type="tns:Status" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="cref" type="xs:string"/>
+	</xs:complexType>
+	<xs:complexType name="Status">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="code" type="xs:int" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="ServerFault">
+		<xs:sequence>
+			<xs:element name="Message" type="xs:string" nillable="true" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ServerFault" type="tns:ServerFault" nillable="true"/>
+	<xs:complexType name="ValidationFault">
+		<xs:sequence>
+			<xs:element name="Message" type="xs:string" nillable="true" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ValidationFault" type="tns:ValidationFault" nillable="true"/>
+</xs:schema>
